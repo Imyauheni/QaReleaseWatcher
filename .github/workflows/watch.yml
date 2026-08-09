@@ -1,0 +1,61 @@
+name: QA stack release watch
+
+on:
+  schedule:
+    - cron: '0 12 * * 1-5'   # 08:00 America/New_York, weekdays
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The script exits 1 when it finds new releases, which is a success
+      # condition here. GitHub Actions runs `run:` steps under `bash -e`, so a
+      # bare invocation would abort the step before the exit code is captured.
+      # Disable errexit around the call, capture the code, then decide.
+      - name: Check for new releases
+        id: watch
+        shell: bash
+        run: |
+          set +e
+          python3 qa_release_watch.py \
+            --state .watch-state.json \
+            --markdown digest.md \
+            --no-colour
+          code=$?
+          set -e
+
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
+
+          case "${code}" in
+            0) echo "No new releases." ;;
+            1) echo "New releases found." ;;
+            2) echo "::warning::One or more feeds failed — see log above." ;;
+            *) echo "::error::Unexpected exit code ${code}"; exit 1 ;;
+          esac
+
+      - name: Commit digest and state
+        shell: bash
+        run: |
+          git config user.name  "release-watch"
+          git config user.email "release-watch@users.noreply.github.com"
+          git add digest.md .watch-state.json
+          if git diff --staged --quiet; then
+            echo "Nothing changed."
+          else
+            git commit -m "chore: release digest $(date -u +%Y-%m-%d)"
+            git push
+          fi
