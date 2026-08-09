@@ -29,11 +29,16 @@ jobs:
       - name: Check for new releases
         id: watch
         shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           set +e
           python3 qa_release_watch.py \
             --state .watch-state.json \
             --markdown digest.md \
+            --telegram \
+            --stable-only \
             --no-colour
           code=$?
           set -e
