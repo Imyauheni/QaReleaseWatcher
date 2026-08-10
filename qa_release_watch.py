@@ -345,7 +345,7 @@ def _redact(text: str) -> str:
 
 
 TELEGRAM_LIMIT = 4096
-TELEGRAM_CHUNK = 3900  # headroom for the part-counter suffix
+TELEGRAM_CHUNK = 3500  # headroom for the part-counter suffix and safety margin
 
 
 def chunk_message(text: str, limit: int = TELEGRAM_CHUNK) -> list[str]:
@@ -514,10 +514,10 @@ def run(args: argparse.Namespace) -> int:
         seen[name] = [r.uid() for r in releases][: args.per_feed * 3] or seen.get(name, [])
 
     state["last_run"] = datetime.now(timezone.utc).isoformat()
-    if not args.dry_run:
-        save_state(state_path, state)
 
     if args.init:
+        if not args.dry_run:
+            save_state(state_path, state)
         print(f"Seeded state for {len(feeds) - len(errors)} feed(s) at {state_path}")
         if errors:
             for name, message in errors:
@@ -531,13 +531,23 @@ def run(args: argparse.Namespace) -> int:
         Path(args.markdown).write_text(render_markdown(new_releases, errors), encoding="utf-8")
         print(f"\nWrote {args.markdown}")
 
+    # State is persisted only AFTER a successful notification. Saving first
+    # would mark these releases as seen even when the push failed, and they
+    # would never be reported again — silent data loss. Retrying a duplicate
+    # is a far cheaper failure than never hearing about a release.
+    notified = True
     if args.telegram and new_releases:
         try:
             push_telegram(render_telegram(new_releases))
             print("Pushed to Telegram")
         except Exception as exc:  # noqa: BLE001
+            notified = False
             print(f"Telegram push failed: {_redact(str(exc))}", file=sys.stderr)
+            print("State not saved — these releases will be retried next run.", file=sys.stderr)
             errors.append(("telegram", _redact(str(exc))))
+
+    if not args.dry_run and notified:
+        save_state(state_path, state)
 
     if errors:
         return 2

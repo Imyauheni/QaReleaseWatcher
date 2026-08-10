@@ -596,5 +596,58 @@ class TestChunking(unittest.TestCase):
         self.assertEqual(send.call_count, expected)
 
 
+class TestNotificationDurability(unittest.TestCase, QuietMixin):
+    """Releases must not be marked seen unless the user was actually told."""
+
+    def setUp(self):
+        self.silence()
+        self.tmp = tempfile.TemporaryDirectory()
+        self.state = Path(self.tmp.name) / "state.json"
+        self.config = Path(self.tmp.name) / "feeds.json"
+        self.config.write_text(
+            json.dumps([{"name": "Robot Framework", "url": "https://pypi.invalid/f.xml", "tier": "core"}]),
+            encoding="utf-8",
+        )
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def args(self, **overrides):
+        defaults = dict(
+            config=str(self.config), state=str(self.state), init=False, markdown=None,
+            telegram=True, telegram_test=False, stable_only=False, per_feed=5,
+            timeout=5, dry_run=False, no_colour=True, write_config=None,
+        )
+        defaults.update(overrides)
+        return argparse.Namespace(**defaults)
+
+    def test_failed_push_does_not_persist_state(self):
+        with mock.patch.object(watcher, "fetch", return_value=PYPI_RSS):
+            with mock.patch.object(watcher, "push_telegram", side_effect=RuntimeError("too long")):
+                watcher.run(self.args())
+        self.assertFalse(self.state.exists(), "state saved despite a failed notification")
+
+    def test_releases_are_retried_after_a_failed_push(self):
+        with mock.patch.object(watcher, "fetch", return_value=PYPI_RSS):
+            with mock.patch.object(watcher, "push_telegram", side_effect=RuntimeError("too long")):
+                watcher.run(self.args())
+            # Second run: push succeeds, and must still see the same releases.
+            with mock.patch.object(watcher, "push_telegram") as push:
+                watcher.run(self.args())
+        self.assertEqual(push.call_count, 1)
+        self.assertIn("7.4.2", push.call_args[0][0])
+
+    def test_successful_push_persists_state(self):
+        with mock.patch.object(watcher, "fetch", return_value=PYPI_RSS):
+            with mock.patch.object(watcher, "push_telegram"):
+                watcher.run(self.args())
+        self.assertTrue(self.state.exists())
+
+    def test_state_still_saved_when_telegram_is_not_requested(self):
+        with mock.patch.object(watcher, "fetch", return_value=PYPI_RSS):
+            watcher.run(self.args(telegram=False))
+        self.assertTrue(self.state.exists())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
