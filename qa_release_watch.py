@@ -345,15 +345,16 @@ def _redact(text: str) -> str:
 
 
 TELEGRAM_LIMIT = 4096
-TELEGRAM_CHUNK = 3500  # headroom for the part-counter suffix and safety margin
+TELEGRAM_CHUNK = 2500  # conservative chunk size accounting for URL encoding and parameter overhead
 
 
 def chunk_message(text: str, limit: int = TELEGRAM_CHUNK) -> list[str]:
     """Split a message into Telegram-sized pieces, breaking on line boundaries.
 
-    Telegram rejects anything over 4096 characters with a 400. A first run
-    reporting every feed comfortably exceeds that, so splitting is mandatory
-    rather than defensive.
+    Telegram rejects anything over 4096 characters with a 400. When the message
+    is URL-encoded as a POST parameter (chat_id=...&text=...&...), the actual
+    payload can grow significantly. We use a conservative chunk size that accounts
+    for this overhead plus the part counter suffix.
     """
     if len(text) <= limit:
         return [text]
