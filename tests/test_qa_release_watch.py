@@ -514,5 +514,44 @@ class TestTelegramCredentials(QuietMixin, unittest.TestCase):
         tmp.cleanup()
 
 
+class TestRedaction(unittest.TestCase):
+    """The bot token sits in the Telegram URL path, so any leaked URL leaks
+    the credential. These guard the redactor that stands between an error and
+    a log file."""
+
+    def test_token_removed_from_url(self):
+        with mock.patch.dict("os.environ", {"TELEGRAM_BOT_TOKEN": "8123:AAHsecret"}):
+            out = watcher._redact("https://api.telegram.org/bot8123:AAHsecret/sendMessage")
+        self.assertNotIn("AAHsecret", out)
+
+    def test_token_removed_from_plain_text(self):
+        with mock.patch.dict("os.environ", {"TELEGRAM_BOT_TOKEN": "8123:AAHsecret"}):
+            out = watcher._redact("failed with token 8123:AAHsecret")
+        self.assertNotIn("AAHsecret", out)
+
+    def test_url_pattern_redacted_even_when_env_unset(self):
+        """Defence in depth: works even if the variable is gone by log time."""
+        with mock.patch.dict("os.environ", {}, clear=True):
+            out = watcher._redact("https://api.telegram.org/botLEAKED999/sendMessage")
+        self.assertNotIn("LEAKED999", out)
+
+    def test_ordinary_text_is_untouched(self):
+        with mock.patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(watcher._redact("connection refused"), "connection refused")
+
+    def test_http_error_message_never_carries_the_token(self):
+        import io as _io
+        import urllib.error
+        exc = urllib.error.HTTPError(
+            "https://api.telegram.org/bot8123:AAHsecret/sendMessage",
+            401, "Unauthorized", {}, _io.BytesIO(b"{}"),
+        )
+        with mock.patch.dict("os.environ", {"TELEGRAM_BOT_TOKEN": "8123:AAHsecret", "TELEGRAM_CHAT_ID": "1"}):
+            with mock.patch("urllib.request.urlopen", side_effect=exc):
+                with self.assertRaises(RuntimeError) as ctx:
+                    watcher.push_telegram("hi")
+        self.assertNotIn("AAHsecret", str(ctx.exception))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -5,27 +5,44 @@ on:
     - cron: '0 12 * * 1-5'   # 08:00 America/New_York, weekdays
   workflow_dispatch:
 
-permissions:
-  contents: write
+# No workflow-level permissions block: the default is read-only, and write is
+# granted per-job below. Least privilege by default rather than by exception.
+permissions: {}
 
 concurrency:
   group: release-watch
-  cancel-in-progress: false
+  cancel-in-progress: false   # never interrupt a run mid-push
 
 jobs:
   watch:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+    permissions:
+      contents: write   # required: the job commits digest.md and state back
+
+    steps:
+      # Actions are pinned to full commit SHAs, not floating major tags.
+      # A tag can be repointed by whoever controls the action's repo; a SHA
+      # cannot. Regenerate these with the command in SECURITY.md and review
+      # the diff before bumping.
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2------------------
+        with:
+          persist-credentials: true   # needed for the push step below
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0---------------
         with:
           python-version: '3.12'
 
+      # Fast feedback: if the watcher itself is broken, fail before touching
+      # the network or the repo.
+      - name: Run test suite
+        run: python3 -m unittest discover -s tests
+
       # The script exits 1 when it finds new releases, which is a success
-      # condition here. GitHub Actions runs `run:` steps under `bash -e`, so a
-      # bare invocation would abort the step before the exit code is captured.
-      # Disable errexit around the call, capture the code, then decide.
+      # condition here. Actions runs `run:` steps under `bash -e`, so a bare
+      # invocation would abort the step before the exit code is captured.
       - name: Check for new releases
         id: watch
         shell: bash
@@ -43,24 +60,39 @@ jobs:
           code=$?
           set -e
 
-          echo "code=${code}" >> "$GITHUB_OUTPUT"
-
           case "${code}" in
             0) echo "No new releases." ;;
             1) echo "New releases found." ;;
-            2) echo "::warning::One or more feeds failed — see log above." ;;
+            2) echo "::warning::A feed or the Telegram push failed — see log above." ;;
             *) echo "::error::Unexpected exit code ${code}"; exit 1 ;;
           esac
 
+      # A manual run overlapping the schedule would otherwise collide on push.
+      # Rebase onto whatever landed first, then retry.
       - name: Commit digest and state
         shell: bash
         run: |
           git config user.name  "release-watch"
           git config user.email "release-watch@users.noreply.github.com"
+
           git add digest.md .watch-state.json
+
           if git diff --staged --quiet; then
             echo "Nothing changed."
-          else
-            git commit -m "chore: release digest $(date -u +%Y-%m-%d)"
-            git push
+            exit 0
           fi
+
+          git commit -m "chore: release digest $(date -u +%Y-%m-%d)"
+
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "Pushed on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push rejected — rebasing and retrying."
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || exit 1
+            sleep $((attempt * 3))
+          done
+
+          echo "::error::Could not push after 3 attempts."
+          exit 1

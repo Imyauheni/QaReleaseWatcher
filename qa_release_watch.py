@@ -330,6 +330,20 @@ def render_telegram(releases: list[Release]) -> str:
     return "\n".join(parts)
 
 
+def _redact(text: str) -> str:
+    """Strip the bot token from any string bound for a log.
+
+    urllib embeds the full request URL in HTTPError.url, and the Telegram API
+    puts the token *in the path*. GitHub Actions masks registered secrets, but
+    cron and local runs have no such net, so redact at the source.
+    """
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    if token and token in text:
+        text = text.replace(token, "<redacted>")
+    # Belt and braces: catch any bot<token>/ pattern regardless of env state.
+    return re.sub(r"/bot[^/\s]+/", "/bot<redacted>/", text)
+
+
 def push_telegram(message: str) -> None:
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
@@ -363,10 +377,10 @@ def push_telegram(message: str) -> None:
             hint = " — check TELEGRAM_CHAT_ID, and send your bot a message first"
         elif exc.code == 403:
             hint = " — open the chat and press Start so the bot may message you"
-        raise RuntimeError(f"Telegram API {exc.code}: {detail or exc.reason}{hint}") from exc
+        raise RuntimeError(_redact(f"Telegram API {exc.code}: {detail or exc.reason}{hint}")) from exc
 
     if not body.get("ok"):
-        raise RuntimeError(f"Telegram rejected the message: {body.get('description', body)}")
+        raise RuntimeError(_redact(f"Telegram rejected the message: {body.get('description', body)}"))
 
 
 # --------------------------------------------------------------------------
@@ -408,7 +422,7 @@ def telegram_self_test() -> int:
     try:
         push_telegram(message)
     except Exception as exc:  # noqa: BLE001
-        print(f"Telegram test FAILED: {exc}", file=sys.stderr)
+        print(f"Telegram test FAILED: {_redact(str(exc))}", file=sys.stderr)
         return 2
     print("Telegram test message sent — check your chat.")
     return 0
@@ -472,8 +486,8 @@ def run(args: argparse.Namespace) -> int:
             push_telegram(render_telegram(new_releases))
             print("Pushed to Telegram")
         except Exception as exc:  # noqa: BLE001
-            print(f"Telegram push failed: {exc}", file=sys.stderr)
-            errors.append(("telegram", str(exc)))
+            print(f"Telegram push failed: {_redact(str(exc))}", file=sys.stderr)
+            errors.append(("telegram", _redact(str(exc))))
 
     if errors:
         return 2
