@@ -2,5 +2,6 @@ __pycache__/
 *.pyc
 .vscode/settings.json
 .DS_Store
-tests/.DS_Storerun-watch.sh
+tests/.DS_Store
+run-watch.sh
 logs/
