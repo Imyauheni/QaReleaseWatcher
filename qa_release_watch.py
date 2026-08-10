@@ -344,7 +344,57 @@ def _redact(text: str) -> str:
     return re.sub(r"/bot[^/\s]+/", "/bot<redacted>/", text)
 
 
+TELEGRAM_LIMIT = 4096
+TELEGRAM_CHUNK = 3900  # headroom for the part-counter suffix
+
+
+def chunk_message(text: str, limit: int = TELEGRAM_CHUNK) -> list[str]:
+    """Split a message into Telegram-sized pieces, breaking on line boundaries.
+
+    Telegram rejects anything over 4096 characters with a 400. A first run
+    reporting every feed comfortably exceeds that, so splitting is mandatory
+    rather than defensive.
+    """
+    if len(text) <= limit:
+        return [text]
+
+    chunks: list[str] = []
+    current: list[str] = []
+    size = 0
+
+    for line in text.split("\n"):
+        # A single line longer than the limit would loop forever; hard-split it.
+        while len(line) > limit:
+            if current:
+                chunks.append("\n".join(current))
+                current, size = [], 0
+            chunks.append(line[:limit])
+            line = line[limit:]
+
+        if size + len(line) + 1 > limit and current:
+            chunks.append("\n".join(current))
+            current, size = [], 0
+
+        current.append(line)
+        size += len(line) + 1
+
+    if current:
+        chunks.append("\n".join(current))
+
+    total = len(chunks)
+    return [f"{c}\n\n({i} of {total})" for i, c in enumerate(chunks, 1)]
+
+
 def push_telegram(message: str) -> None:
+    """Send a message, splitting it if it exceeds Telegram's size limit."""
+    parts = chunk_message(message)
+    for index, part in enumerate(parts):
+        _send_one(part)
+        if index < len(parts) - 1:
+            time.sleep(0.5)  # stay under Telegram's per-chat rate limit
+
+
+def _send_one(message: str) -> None:
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     if not token:

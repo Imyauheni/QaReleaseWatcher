@@ -553,5 +553,48 @@ class TestRedaction(unittest.TestCase):
         self.assertNotIn("AAHsecret", str(ctx.exception))
 
 
+class TestChunking(unittest.TestCase):
+    """Telegram rejects messages over 4096 chars with a 400. The first run
+    reports every feed and blows past that, so chunking is load-bearing."""
+
+    def test_short_message_is_not_split(self):
+        self.assertEqual(watcher.chunk_message("hello"), ["hello"])
+
+    def test_long_message_is_split(self):
+        body = "\n".join(f"line {i} " + "x" * 60 for i in range(300))
+        self.assertGreater(len(watcher.chunk_message(body)), 1)
+
+    def test_every_chunk_is_under_the_api_limit(self):
+        body = "\n".join(f"line {i} " + "x" * 60 for i in range(300))
+        for chunk in watcher.chunk_message(body):
+            self.assertLessEqual(len(chunk), watcher.TELEGRAM_LIMIT)
+
+    def test_chunks_are_numbered(self):
+        body = "\n".join("y" * 80 for _ in range(200))
+        chunks = watcher.chunk_message(body)
+        self.assertIn(f"(1 of {len(chunks)})", chunks[0])
+
+    def test_no_content_is_lost(self):
+        body = "\n".join(f"unique-marker-{i}" for i in range(400))
+        joined = "".join(watcher.chunk_message(body))
+        for i in (0, 200, 399):
+            self.assertIn(f"unique-marker-{i}", joined)
+
+    def test_single_oversized_line_does_not_hang(self):
+        """A line longer than the limit must hard-split, not loop forever."""
+        chunks = watcher.chunk_message("z" * 12000)
+        self.assertGreater(len(chunks), 1)
+        for chunk in chunks:
+            self.assertLessEqual(len(chunk), watcher.TELEGRAM_LIMIT)
+
+    def test_push_sends_one_request_per_chunk(self):
+        body = "\n".join("w" * 80 for _ in range(200))
+        expected = len(watcher.chunk_message(body))
+        with mock.patch.object(watcher, "_send_one") as send:
+            with mock.patch.object(watcher.time, "sleep"):
+                watcher.push_telegram(body)
+        self.assertEqual(send.call_count, expected)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
