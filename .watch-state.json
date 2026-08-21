@@ -1,5 +1,5 @@
 {
-  "last_run": "2026-08-20T13:03:16.031810+00:00",
+  "last_run": "2026-08-21T13:02:25.890727+00:00",
   "seen": {
     "Appium Python client": [
       "https://pypi.org/project/appium-python-client/6.0.0/",
@@ -23,11 +23,11 @@
       "https://pypi.org/project/robotframework-browser/20.0.0/"
     ],
     "FlaUI library": [
+      "https://pypi.org/project/robotframework-flaui/5.0.2/",
       "https://pypi.org/project/robotframework-flaui/5.0.1/",
       "https://pypi.org/project/robotframework-flaui/5.0.0/",
       "https://pypi.org/project/robotframework-flaui/4.1.1/",
-      "https://pypi.org/project/robotframework-flaui/4.1.0/",
-      "https://pypi.org/project/robotframework-flaui/4.0.5/"
+      "https://pypi.org/project/robotframework-flaui/4.1.0/"
     ],
     "Pabot (parallel)": [
       "https://pypi.org/project/robotframework-pabot/5.3.0b1/",

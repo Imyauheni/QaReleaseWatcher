@@ -1,7 +1,6 @@
-# QA stack releases — 2026-08-20
+# QA stack releases — 2026-08-21
 
 
-## core
+## desktop
 
-- **Browser batteries** [20.4.0](https://pypi.org/project/robotframework-browser-batteries/20.4.0/) — 2026-08-19
-- **Browser library (Playwright)** [20.4.0](https://pypi.org/project/robotframework-browser/20.4.0/) — 2026-08-19
+- **FlaUI library** [5.0.2](https://pypi.org/project/robotframework-flaui/5.0.2/) — 2026-08-20
