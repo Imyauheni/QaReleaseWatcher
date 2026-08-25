@@ -1,3 +1,6 @@
-# QA stack releases — 2026-08-24
+# QA stack releases — 2026-08-25
 
-_No new releases since the last run._
+
+## desktop
+
+- **FlaUI library** [5.1.0](https://pypi.org/project/robotframework-flaui/5.1.0/) — 2026-08-25
