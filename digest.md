@@ -1,6 +1,6 @@
-# QA stack releases — 2026-08-25
+# QA stack releases — 2026-08-26
 
 
-## desktop
+## tooling
 
-- **FlaUI library** [5.1.0](https://pypi.org/project/robotframework-flaui/5.1.0/) — 2026-08-25
+- **Robocop (lint/format)** [9.0.0](https://pypi.org/project/robotframework-robocop/9.0.0/) — 2026-08-26
