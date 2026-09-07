@@ -1,5 +1,5 @@
 {
-  "last_run": "2026-09-04T16:13:21.010911+00:00",
+  "last_run": "2026-09-07T17:40:55.255574+00:00",
   "seen": {
     "Appium Python client": [
       "https://pypi.org/project/appium-python-client/6.0.0/",
@@ -37,11 +37,11 @@
       "https://pypi.org/project/robotframework-pabot/5.2.0rc2/"
     ],
     "Playwright (upstream)": [
+      "https://github.com/microsoft/playwright/releases/tag/v1.63.0",
       "https://github.com/microsoft/playwright/releases/tag/v1.62.1",
       "https://github.com/microsoft/playwright/releases/tag/v1.62.0",
       "https://github.com/microsoft/playwright/releases/tag/v1.61.1",
-      "https://github.com/microsoft/playwright/releases/tag/v1.61.0",
-      "https://github.com/microsoft/playwright/releases/tag/v1.59.0"
+      "https://github.com/microsoft/playwright/releases/tag/v1.61.0"
     ],
     "RequestsLibrary": [
       "https://pypi.org/project/robotframework-requests/1.0a14/",

@@ -1,6 +1,6 @@
-# QA stack releases — 2026-09-04
+# QA stack releases — 2026-09-07
 
 
-## desktop
+## core
 
-- **FlaUI library** [5.2.1](https://pypi.org/project/robotframework-flaui/5.2.1/) — 2026-09-03
+- **Playwright (upstream)** [1.63.0](https://github.com/microsoft/playwright/releases/tag/v1.63.0) — 2026-09-04
