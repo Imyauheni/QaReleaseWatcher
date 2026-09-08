@@ -1,6 +1,7 @@
-# QA stack releases — 2026-09-07
+# QA stack releases — 2026-09-08
 
 
-## core
+## desktop
 
-- **Playwright (upstream)** [1.63.0](https://github.com/microsoft/playwright/releases/tag/v1.63.0) — 2026-09-04
+- **Appium Python client** [6.0.1](https://pypi.org/project/appium-python-client/6.0.1/) — 2026-09-08
+- **Appium Python client** [6.0.2](https://pypi.org/project/appium-python-client/6.0.2/) — 2026-09-08
