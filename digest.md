@@ -1,7 +1,7 @@
-# QA stack releases — 2026-09-08
+# QA stack releases — 2026-09-09
 
 
 ## desktop
 
-- **Appium Python client** [6.0.1](https://pypi.org/project/appium-python-client/6.0.1/) — 2026-09-08
-- **Appium Python client** [6.0.2](https://pypi.org/project/appium-python-client/6.0.2/) — 2026-09-08
+- **Appium Python client** [6.0.3](https://pypi.org/project/appium-python-client/6.0.3/) — 2026-09-09
+- **Appium Python client** [6.0.4](https://pypi.org/project/appium-python-client/6.0.4/) — 2026-09-09
