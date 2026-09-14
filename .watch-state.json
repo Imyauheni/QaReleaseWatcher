@@ -1,12 +1,12 @@
 {
-  "last_run": "2026-09-11T16:20:41.017589+00:00",
+  "last_run": "2026-09-14T18:00:59.111254+00:00",
   "seen": {
     "Appium Python client": [
+      "https://pypi.org/project/appium-python-client/6.0.6/",
       "https://pypi.org/project/appium-python-client/6.0.5/",
       "https://pypi.org/project/appium-python-client/6.0.4/",
       "https://pypi.org/project/appium-python-client/6.0.3/",
-      "https://pypi.org/project/appium-python-client/6.0.2/",
-      "https://pypi.org/project/appium-python-client/6.0.1/"
+      "https://pypi.org/project/appium-python-client/6.0.2/"
     ],
     "Browser batteries": [
       "https://pypi.org/project/robotframework-browser-batteries/20.4.0/",
@@ -58,11 +58,11 @@
       "https://pypi.org/project/robotframework-robocop/8.7.0/"
     ],
     "Robot Framework": [
+      "https://pypi.org/project/robotframework/7.5/",
       "https://pypi.org/project/robotframework/7.5rc1/",
       "https://pypi.org/project/robotframework/7.5b1/",
       "https://pypi.org/project/robotframework/7.4.2/",
-      "https://pypi.org/project/robotframework/7.4.1/",
-      "https://pypi.org/project/robotframework/7.4/"
+      "https://pypi.org/project/robotframework/7.4.1/"
     ],
     "SeleniumLibrary": [
       "https://pypi.org/project/robotframework-seleniumlibrary/6.9.0/",

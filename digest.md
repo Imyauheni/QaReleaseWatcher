@@ -1,3 +1,10 @@
-# QA stack releases — 2026-09-11
+# QA stack releases — 2026-09-14
 
-_No new releases since the last run._
+
+## core
+
+- **Robot Framework** [7.5](https://pypi.org/project/robotframework/7.5/) — 2026-09-14
+
+## desktop
+
+- **Appium Python client** [6.0.6](https://pypi.org/project/appium-python-client/6.0.6/) — 2026-09-12
