@@ -1,3 +1,6 @@
-# QA stack releases — 2026-09-24
+# QA stack releases — 2026-09-25
 
-_No new releases since the last run._
+
+## tooling
+
+- **Robocop (lint/format)** [9.1.0](https://pypi.org/project/robotframework-robocop/9.1.0/) — 2026-09-25
