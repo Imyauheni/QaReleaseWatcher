@@ -1,6 +1,3 @@
-# QA stack releases — 2026-10-08
+# QA stack releases — 2026-10-09
 
-
-## core
-
-- **Playwright (upstream)** [1.64.0](https://github.com/microsoft/playwright/releases/tag/v1.64.0) — 2026-10-07
+_No new releases since the last run._
