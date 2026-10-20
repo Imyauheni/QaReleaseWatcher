@@ -1,12 +1,12 @@
 {
-  "last_run": "2026-10-19T18:39:05.109470+00:00",
+  "last_run": "2026-10-20T16:46:23.320241+00:00",
   "seen": {
     "Appium Python client": [
+      "https://pypi.org/project/appium-python-client/6.0.8/",
       "https://pypi.org/project/appium-python-client/6.0.7/",
       "https://pypi.org/project/appium-python-client/6.0.6/",
       "https://pypi.org/project/appium-python-client/6.0.5/",
-      "https://pypi.org/project/appium-python-client/6.0.4/",
-      "https://pypi.org/project/appium-python-client/6.0.3/"
+      "https://pypi.org/project/appium-python-client/6.0.4/"
     ],
     "Browser batteries": [
       "https://pypi.org/project/robotframework-browser-batteries/20.6.0/",
