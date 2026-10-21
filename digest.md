@@ -1,6 +1,6 @@
-# QA stack releases — 2026-10-20
+# QA stack releases — 2026-10-21
 
 
 ## desktop
 
-- **Appium Python client** [6.0.8](https://pypi.org/project/appium-python-client/6.0.8/) — 2026-10-20
+- **FlaUI library** [6.0.0](https://pypi.org/project/robotframework-flaui/6.0.0/) — 2026-10-20
