@@ -1,6 +1,10 @@
-# QA stack releases — 2026-10-23
+# QA stack releases — 2026-10-26
 
 
-## tooling
+## desktop
 
-- **Robocop (lint/format)** [9.1.2](https://pypi.org/project/robotframework-robocop/9.1.2/) — 2026-10-23
+- **Appium Python client** [6.0.9](https://pypi.org/project/appium-python-client/6.0.9/) — 2026-10-24
+
+## Feed errors
+
+- `axe-core`: failed after 3 attempts: HTTP Error 502: Bad Gateway or Proxy Error
