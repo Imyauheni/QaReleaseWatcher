@@ -1,6 +1,3 @@
-# QA stack releases — 2026-10-28
+# QA stack releases — 2026-10-29
 
-
-## api
-
-- **pytest** [9.2.0](https://pypi.org/project/pytest/9.2.0/) — 2026-10-27
+_No new releases since the last run._
