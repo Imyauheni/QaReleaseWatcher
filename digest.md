@@ -1,6 +1,3 @@
-# QA stack releases — 2026-11-19
+# QA stack releases — 2026-11-20
 
-
-## desktop
-
-- **Appium Python client** [6.1.8](https://pypi.org/project/appium-python-client/6.1.8/) — 2026-11-19
+_No new releases since the last run._
